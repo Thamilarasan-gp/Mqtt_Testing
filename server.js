@@ -1,14 +1,15 @@
 const aedes = require("aedes")();
-const net = require("net");
-const PORT = process.env.PORT || 1883;
+const http = require("http");
+const websocket = require("websocket-stream");
 
-const server = net.createServer(aedes.handle);
+const PORT = process.env.PORT || 9001;
 
-// Log all client connections/disconnections
+const server = http.createServer();
+websocket.createServer({ server }, aedes.handle);
+
 aedes.on("client", (client) => console.log("Client connected:", client.id));
 aedes.on("clientDisconnect", (client) => console.log("Client disconnected:", client.id));
 
-// Log messages for debugging
 aedes.on("publish", (packet, client) => {
   if (packet.topic && packet.payload) {
     console.log(`Topic: ${packet.topic} → Message: ${packet.payload.toString()}`);
@@ -16,7 +17,6 @@ aedes.on("publish", (packet, client) => {
   }
 });
 
-// Start server
 server.listen(PORT, () => {
-  console.log(`MQTT TCP Broker running on port ${PORT}`);
+  console.log(`MQTT WebSocket Broker running on ws://localhost:${PORT}`);
 });
