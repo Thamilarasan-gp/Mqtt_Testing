@@ -1,11 +1,10 @@
-// server/index.js
 const express = require("express");
 const http = require("http");
 const aedes = require("aedes")();
 const websocket = require("websocket-stream");
 
 const app = express();
-const PORT = process.env.PORT || 443; // Render assigns a port automatically
+const PORT = process.env.PORT || 443; // Render assigns port automatically
 
 // Create HTTP server
 const server = http.createServer(app);
@@ -22,9 +21,9 @@ aedes.on("clientDisconnect", (client) => {
   console.log("Client disconnected:", client ? client.id : "unknown");
 });
 
-// Log all messages
-aedes.on("publish", async (packet, client) => {
-  if (packet.topic && packet.payload) {
+// Log only app messages, ignore $SYS
+aedes.on("publish", (packet, client) => {
+  if (packet.topic && packet.payload && !packet.topic.startsWith("$SYS")) {
     const message = packet.payload.toString();
     console.log(`Topic: ${packet.topic} → Message: ${message}`);
     if (client) console.log("Published by client:", client.id);
@@ -35,5 +34,5 @@ aedes.on("publish", async (packet, client) => {
 // Start server
 server.listen(PORT, () => {
   console.log(`Broker + Express running on port ${PORT}`);
-  console.log(`WebSocket URL: wss://your-domain.com`); // Render automatically provides HTTPS/WSS
+  console.log(`WebSocket URL: wss://mqtt-testing-v7hr.onrender.com`); // Render handles SSL
 });
